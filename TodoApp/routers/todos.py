@@ -5,6 +5,9 @@ from models import Todos
 from typing import Annotated
 from database  import engine, SessionLocal
 from sqlalchemy.orm import Session
+from routers.auth import get_current_user
+
+
 todo_router = APIRouter()
 def get_db():
     db = SessionLocal()
@@ -14,6 +17,8 @@ def get_db():
         db.close()
 # Depends: it is for dependency injection
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[dict, Depends(get_current_user)]
+
 
 class TodoRequest(BaseModel):
     title:str = Field(min_length=3)
@@ -22,20 +27,29 @@ class TodoRequest(BaseModel):
     complete:bool
 
 @todo_router.get("/", status_code=status.HTTP_200_OK)
-async def read_all(db:db_dependency):
-    return db.query(Todos).all()
+async def read_all(user:user_dependency,   db:db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401)
+    return db.query(Todos).filter(Todos.owner_id == user.get("id")).all()
 
 @todo_router.get("/todo/{Id}", status_code=status.HTTP_200_OK)
-async def read_one( db:db_dependency, Id:int =Path(gt=0)):
-    todo_model = db.query(Todos).filter(Todos.id == Id).first()
+async def read_one( user:user_dependency, db:db_dependency, Id:int =Path(gt=0)):
+    if user is None:
+        raise HTTPException(status_code=401)
+    todo_model = db.query(Todos).filter(Todos.id == Id).filter(Todos.owner_id == user.get("id")).first()
     if todo_model is not None:
         return todo_model
     raise HTTPException(status_code=404, detail="Todo not found")
 
 
 @todo_router.post("/create-todo", status_code=status.HTTP_201_CREATED)
-async def create_todo(db:db_dependency, todo_request: TodoRequest):
-    todo_model = Todos(**todo_request.model_dump())
+async def create_todo(user:user_dependency,db:db_dependency, todo_request: TodoRequest):
+    print("user")
+    if user is None:
+        raise HTTPException(status_code=401)
+    
+    todo_model = Todos(**todo_request.model_dump(), owner_id=user.get("id"))
+    
     db.add(todo_model)
     db.commit()
 
