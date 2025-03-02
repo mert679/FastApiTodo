@@ -401,11 +401,25 @@ In FastAPI, Authentication verifies who the user is, while Authorization checks 
         target_metadata = Base.metadata
 
 - What is Base.metadata?
-    In SQLAlchemy, Base.metadata contains metadata information about all the tables defined using Base.For example, in your FastAPI project, you define a Base class in database.py:
+    In SQLAlchemy, Base.metadata contains metadata information about all the tables defined using Base.For example, in your FastAPI project, you define a Base class in models.py:
     - ```python
-        from sqlalchemy.ext.declarative import declarative_base
+        from database import Base
+        from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
-        Base = declarative_base()
+
+        class User(Base):
+            __tablename__ = "users"
+            id = Column(Integer, primary_key = True, index=True) 
+            email = Column(String, unique=True)
+            username = Column(String,unique=True)
+            first_name = Column(String)
+            last_name = Column(String)
+            hashed_password = Column(String)
+            is_active = Column(Boolean ,default=True)
+            role = Column(String)
+            phone_number = Column(Integer, nullable=True)
+            phone_number2 = Column(Integer, nullable=True)
+
     Now, every model that inherits from Base (e.g., Todos, User) is automatically registered in Base.metadata.
 
 -  Why Use target_metadata = Base.metadata?

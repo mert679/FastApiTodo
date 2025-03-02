@@ -13,7 +13,8 @@ class User(Base):
     is_active = Column(Boolean ,default=True)
     role = Column(String)
     phone_number = Column(Integer, nullable=True)
-    
+    phone_number2 = Column(Integer, nullable=True)
+
 
 class Todos(Base):
     __tablename__ = "todos"
