@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from models import Todos, Base
 from database  import engine, SessionLocal
 from sqlalchemy.orm import Session
-from routers import auth, todos
+from routers import auth, todos, users
 
 
 app = FastAPI()
@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine) #it creates todos.db does not exits. İf w
 
 app.include_router(auth.router)
 app.include_router(todos.todo_router)
-
+app.include_router(users.user_router)
 
 
 # create db dependency
