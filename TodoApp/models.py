@@ -12,6 +12,7 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean ,default=True)
     role = Column(String)
+    phone_number = Column(Integer, nullable=True)
     
 
 class Todos(Base):
@@ -22,6 +23,7 @@ class Todos(Base):
     priority = Column(Integer)
     complete = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey("users.id"))
-
+    extra_explan = Column(String, nullable=True)
+    extra_explan2 = Column(String, nullable=True)
 
 
